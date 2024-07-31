@@ -1,4 +1,4 @@
-import { ctx, shapes, isDrawing, canvas, msgEl, clearBtn, points } from "./main.js";
+import { ctx, shapes, isDrawing, canvas, points } from "./main.js";
 
 export function renderPreviousShapes() {
   shapes.forEach((shape) => {
