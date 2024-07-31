@@ -2,7 +2,6 @@ export const canvas = document.getElementById("canvas");
 export const msgEl = document.getElementById("msg");
 export const clearBtn = document.getElementById("clear");
 
-
 export const ctx = canvas.getContext("2d");
 export let shapes = JSON.parse(localStorage.getItem("shapes")) || [];
 export let points = [];
@@ -60,7 +59,7 @@ function handleCanvasClick(e) {
 canvas.addEventListener("mousemove", handleCanvasMove);
 
 clearBtn.addEventListener("click", handleClear);
-function handleClear(e) {
+function handleClear() {
   localStorage.removeItem("shapes");
   shapes = [];
   points = [];
