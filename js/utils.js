@@ -54,3 +54,47 @@ export function Hmm() {
 
   console.log("Hi ya'll");
 }
+
+export function generateUniqueId() {
+  return "id-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
+}
+
+export function disableButton(button) {
+  button.classList.add("disabled");
+  button.classList.remove("button");
+}
+
+export function enableButton(button) {
+  button.classList.remove("disabled");
+  button.classList.add("button");
+}
+
+export function findShapeInShapes(shapes, x, y) {
+  let shapeFound = null;
+  shapes.forEach((shape) => {
+    shape.points.forEach((element) => {
+      if (Math.abs(element.x - x) < 5 && Math.abs(element.y - y) < 5) {
+        shapeFound = shape;
+        return shapeFound;
+      }
+    });
+  });
+  return shapeFound;
+}
+
+export function drawShape(shape) {
+  ctx.beginPath();
+  shape.points.forEach((element, index) => {
+    if (index === 0) ctx.moveTo(element.x, element.y);
+    else ctx.lineTo(element.x, element.y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = "rgba(173, 216, 230, 0.2)";
+  ctx.fill();
+  ctx.stroke();
+}
+
+export function isButtonEnabled(e) {
+  const button = e.target;
+  return button.classList.contains("button");
+}

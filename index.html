@@ -1,23 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/styles.css" />
     <title>Canvas App</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Vertex Draw</h1>
 
     <div id="canvas-layout">
-        <canvas id="canvas" width="600" height="600"></canvas>
-        <div>
-            <button class="redBtn" id="clear">Clear</button>
-        </div>
+
+      <section id="menu">
+        <button class="button" id="start">Start</button>
+        <button class="disabled" id="stop">Stop</button>
+        <button class="disabled" id="edit">Edit</button>
+        <button class="disabled" id="delete">Delete</button>
+        <button class="button redBtn" id="clear">Clear Canvas</button>
+      </section>
+      <canvas id="canvas" width="600" height="600"></canvas>
     </div>
-    
-    <p id="msg" style="color: green; font-size: 24px; text-align: center;"></p>
+
+    <p id="msg" style="color: green; font-size: 24px; text-align: center"></p>
 
     <script src="js/main.js" type="module"></script>
-</body>
+  </body>
 </html>
