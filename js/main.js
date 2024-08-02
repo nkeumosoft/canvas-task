@@ -1,33 +1,32 @@
-export const canvas = document.getElementById("canvas");
-export const msgEl = document.getElementById("msg");
-export const clearBtn = document.getElementById("clear");
+const canvas = document.getElementById("canvas");
+const msgEl = document.getElementById("msg");
+const clearBtn = document.getElementById("clear");
 
 const startBtn = document.getElementById("start");
 const stopBtn = document.getElementById("stop");
 const editBtn = document.getElementById("edit");
 const deleteBtn = document.getElementById("delete");
 
-export const ctx = canvas.getContext("2d");
-export let shapes = JSON.parse(localStorage.getItem("shapes")) || [];
-export let points = [];
-export let isDrawing = false;
-export let inDrawMode = false;
+const ctx = canvas.getContext("2d");
+let shapes = JSON.parse(localStorage.getItem("shapes")) || [];
+let points = [];
+let isDrawing = false;
+let inDrawMode = false;
 
 let selectedShape = null;
 
 import {
   renderPreviousShapes,
-  handleCanvasMove,
   generateUniqueId,
   disableButton,
   enableButton,
   findShapeInShapes,
   drawShape,
   isButtonEnabled,
-  Hmm,
+  TestCode,
 } from "./utils.js";
 
-Hmm();
+TestCode();
 
 canvas.addEventListener("click", handleCanvasClick);
 function handleCanvasClick(e) {
@@ -40,6 +39,31 @@ function handleCanvasClick(e) {
 }
 
 canvas.addEventListener("mousemove", handleCanvasMove);
+function handleCanvasMove(e) {
+  if (isDrawing) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Rendering previous shapes
+    renderPreviousShapes(ctx, shapes);
+
+    // Drawing the points in the array
+    ctx.beginPath();
+    points.forEach((element, index) => {
+      if (index === 0) ctx.moveTo(element.x, element.y);
+      else ctx.lineTo(element.x, element.y);
+    });
+    ctx.stroke();
+
+    // Drawing the point to follow the mouse movements
+    ctx.beginPath();
+    ctx.moveTo(points[points.length - 1].x, points[points.length - 1].y);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+}
 
 clearBtn.addEventListener("click", handleClear);
 function handleClear() {
@@ -50,7 +74,7 @@ function handleClear() {
   msgEl.innerText = "Canvas cleared";
 }
 
-renderPreviousShapes();
+renderPreviousShapes(ctx, shapes);
 
 startBtn.addEventListener("click", handleStart);
 function handleStart(e) {
@@ -87,7 +111,7 @@ function handleDelete(e) {
     disableButton(editBtn);
     disableButton(deleteBtn);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    renderPreviousShapes();
+    renderPreviousShapes(ctx, shapes);
     msgEl.innerText = "Shape deleted";
   }
 }
@@ -103,7 +127,7 @@ function handleDrawing(x, y) {
   disableButton(stopBtn);
 
   // Rendering previous shapes
-  renderPreviousShapes();
+  renderPreviousShapes(ctx, shapes);
 
   ctx.beginPath();
   points.forEach((element, index) => {
@@ -137,7 +161,7 @@ function handleDrawing(x, y) {
 function handleSelection(x, y) {
   const shape = findShapeInShapes(shapes, x, y);
   if (shape) {
-    drawShape(shape);
+    drawShape(ctx, shape);
     enableButton(editBtn);
     enableButton(deleteBtn);
     selectedShape = shape;

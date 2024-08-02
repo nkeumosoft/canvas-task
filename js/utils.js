@@ -1,6 +1,4 @@
-import { ctx, shapes, isDrawing, canvas, points } from "./main.js";
-
-export function renderPreviousShapes() {
+export function renderPreviousShapes(ctx, shapes) {
   shapes.forEach((shape) => {
     ctx.beginPath();
     shape.points.forEach((element, index) => {
@@ -11,33 +9,7 @@ export function renderPreviousShapes() {
   });
 }
 
-export function handleCanvasMove(e) {
-  if (isDrawing) {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Rendering previous shapes
-    renderPreviousShapes();
-
-    // Drawing the points in the array
-    ctx.beginPath();
-    points.forEach((element, index) => {
-      if (index === 0) ctx.moveTo(element.x, element.y);
-      else ctx.lineTo(element.x, element.y);
-    });
-    ctx.stroke();
-
-    // Drawing the point to follow the mouse movements
-    ctx.beginPath();
-    ctx.moveTo(points[points.length - 1].x, points[points.length - 1].y);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }
-}
-
-export function Hmm() {
+export function TestCode() {
   // how draw a simple shape with canvas
   // ctx.beginPath();
   // ctx.moveTo(50, 100);
@@ -82,7 +54,7 @@ export function findShapeInShapes(shapes, x, y) {
   return shapeFound;
 }
 
-export function drawShape(shape) {
+export function drawShape(ctx, shape) {
   ctx.beginPath();
   shape.points.forEach((element, index) => {
     if (index === 0) ctx.moveTo(element.x, element.y);
