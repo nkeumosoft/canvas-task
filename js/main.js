@@ -90,6 +90,7 @@ function handleStop(e) {
     disableButton(deleteBtn);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     renderPreviousShapes(ctx, shapes);
+    msgEl.innerText = "";
   }
 }
 
@@ -193,6 +194,14 @@ function handleDrawing(x, y) {
     else ctx.lineTo(element.x, element.y);
   });
   ctx.stroke();
+
+  points.forEach((element) => {
+    ctx.beginPath();
+    ctx.arc(element.x, element.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = "black";
+    ctx.fill();
+  });
+
   ctx.beginPath();
   ctx.moveTo(points[points.length - 1].x, points[points.length - 1].y);
   ctx.lineTo(x, y);
