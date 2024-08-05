@@ -5,26 +5,9 @@ export function renderPreviousShapes(ctx, shapes) {
       if (index === 0) ctx.moveTo(element.x, element.y);
       else ctx.lineTo(element.x, element.y);
     });
+    ctx.closePath();
     ctx.stroke();
   });
-}
-
-export function TestCode() {
-  // how draw a simple shape with canvas
-  // ctx.beginPath();
-  // ctx.moveTo(50, 100);
-  // ctx.lineTo(150, 100);
-  // ctx.lineTo(100, 200);
-  // ctx.lineTo(50, 100);
-  //      ctx.stroke();
-  // working with arcs
-  // ctx.beginPath();
-  // ctx.arc(200, 200, 50, 0, Math.PI * 1.25);
-  // ctx.closePath()
-  // ctx.fill()
-  // ctx.stroke();
-
-  console.log("Hi ya'll");
 }
 
 export function generateUniqueId() {
@@ -45,7 +28,7 @@ export function findShapeInShapes(shapes, x, y) {
   let shapeFound = null;
   shapes.forEach((shape) => {
     shape.points.forEach((element) => {
-      if (Math.abs(element.x - x) < 5 && Math.abs(element.y - y) < 5) {
+      if (Math.abs(element.x - x) < 6 && Math.abs(element.y - y) < 6) {
         shapeFound = shape;
         return shapeFound;
       }
@@ -69,4 +52,25 @@ export function drawShape(ctx, shape) {
 export function isButtonEnabled(e) {
   const button = e.target;
   return button.classList.contains("button");
+}
+
+export function drawDotsAroundShape(ctx, shape) {
+  ctx.beginPath();
+  shape.points.forEach((element) => {
+    ctx.moveTo(element.x, element.y);
+    ctx.arc(element.x, element.y, 3, 0, Math.PI * 2);
+  });
+  ctx.fillStyle = "black";
+  ctx.fill();
+}
+
+export function getMatchingPoints(x, y, shape) {
+  let matchingPoints = null;
+  shape.points.forEach((element, index) => {
+    if (Math.abs(element.x - x) < 6 && Math.abs(element.y - y) < 6) {
+      matchingPoints = { x: element.x, y: element.y, index };
+      return matchingPoints;
+    }
+  });
+  return matchingPoints;
 }

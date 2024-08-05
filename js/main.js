@@ -1,7 +1,6 @@
 const canvas = document.getElementById("canvas");
 const msgEl = document.getElementById("msg");
 const clearBtn = document.getElementById("clear");
-
 const startBtn = document.getElementById("start");
 const stopBtn = document.getElementById("stop");
 const editBtn = document.getElementById("edit");
@@ -11,9 +10,12 @@ const ctx = canvas.getContext("2d");
 let shapes = JSON.parse(localStorage.getItem("shapes")) || [];
 let points = [];
 let isDrawing = false;
+let isEditing = false;
 let inDrawMode = false;
+let inEditMode = false;
 
 let selectedShape = null;
+let selectedPointIndex = null;
 
 import {
   renderPreviousShapes,
@@ -23,65 +25,57 @@ import {
   findShapeInShapes,
   drawShape,
   isButtonEnabled,
-  TestCode,
+  drawDotsAroundShape,
+  getMatchingPoints,
 } from "./utils.js";
 
-TestCode();
+renderPreviousShapes(ctx, shapes);
 
 canvas.addEventListener("click", handleCanvasClick);
 function handleCanvasClick(e) {
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
-
-  if (inDrawMode) handleDrawing(x, y);
-  else handleSelection(x, y);
+  if (inDrawMode) handleClickDrawing(x, y);
+  else if (inEditMode) handleClickEditing(x, y);
+  else handleClickSelection(x, y);
 }
 
 canvas.addEventListener("mousemove", handleCanvasMove);
 function handleCanvasMove(e) {
-  if (isDrawing) {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Rendering previous shapes
-    renderPreviousShapes(ctx, shapes);
-
-    // Drawing the points in the array
-    ctx.beginPath();
-    points.forEach((element, index) => {
-      if (index === 0) ctx.moveTo(element.x, element.y);
-      else ctx.lineTo(element.x, element.y);
-    });
-    ctx.stroke();
-
-    // Drawing the point to follow the mouse movements
-    ctx.beginPath();
-    ctx.moveTo(points[points.length - 1].x, points[points.length - 1].y);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  if (isDrawing) handleDrawing(x, y);
+  else if (isEditing && selectedShape && selectedPointIndex)
+    handleEditing(x, y);
 }
 
 clearBtn.addEventListener("click", handleClear);
 function handleClear() {
-  localStorage.removeItem("shapes");
-  shapes = [];
-  points = [];
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  msgEl.innerText = "Canvas cleared";
+  if (
+    window.confirm(
+      "Are you sure you want to proceed with this action? All shapes will be deleted",
+    )
+  ) {
+    localStorage.removeItem("shapes");
+    shapes = [];
+    points = [];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    msgEl.innerText = "Canvas cleared";
+  }
 }
-
-renderPreviousShapes(ctx, shapes);
 
 startBtn.addEventListener("click", handleStart);
 function handleStart(e) {
   if (isButtonEnabled(e)) {
     inDrawMode = true;
+    enableButton(stopBtn);
     disableButton(startBtn);
-    msgEl.innerText = "Started drawing";
+    disableButton(editBtn);
+    disableButton(deleteBtn);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    renderPreviousShapes(ctx, shapes);
   }
 }
 
@@ -89,16 +83,30 @@ stopBtn.addEventListener("click", handleStop);
 function handleStop(e) {
   if (isButtonEnabled(e)) {
     inDrawMode = false;
-    disableButton(stopBtn);
+    inEditMode = false;
     enableButton(startBtn);
-    msgEl.innerText = "Started drawing";
+    disableButton(stopBtn);
+    disableButton(editBtn);
+    disableButton(deleteBtn);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    renderPreviousShapes(ctx, shapes);
   }
 }
 
 editBtn.addEventListener("click", handleEdit);
-function handleEdit() {
-  inDrawMode = false;
-  msgEl.innerText = "Edit mode";
+function handleEdit(e) {
+  if (isButtonEnabled(e) && selectedShape) {
+    inDrawMode = false;
+    inEditMode = true;
+    enableButton(stopBtn);
+    disableButton(startBtn);
+    disableButton(editBtn);
+    disableButton(deleteBtn);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    renderPreviousShapes(ctx, shapes);
+    drawDotsAroundShape(ctx, selectedShape);
+    msgEl.innerText = `Editing shape: ${selectedShape.id}`;
+  }
 }
 
 deleteBtn.addEventListener("click", handleDelete);
@@ -107,37 +115,27 @@ function handleDelete(e) {
     inDrawMode = false;
     shapes = shapes.filter((shape) => shape.id !== selectedShape.id);
     localStorage.setItem("shapes", JSON.stringify(shapes));
-    selectedShape = null;
     disableButton(editBtn);
     disableButton(deleteBtn);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     renderPreviousShapes(ctx, shapes);
-    msgEl.innerText = "Shape deleted";
+    msgEl.innerText = `Shape deleted: ${selectedShape.id}`;
+    selectedShape = null;
   }
 }
 
-function handleDrawing(x, y) {
+function handleClickDrawing(x, y) {
   msgEl.innerText = "";
-
-  // Adding clicked point to the points array
   points.push({ x, y });
-
-  // Setting isDrawing variable to true
   !isDrawing && (isDrawing = true);
   disableButton(stopBtn);
-
-  // Rendering previous shapes
   renderPreviousShapes(ctx, shapes);
-
   ctx.beginPath();
   points.forEach((element, index) => {
     if (index === 0) {
       ctx.moveTo(element.x, element.y);
     } else {
       ctx.lineTo(element.x, element.y);
-
-      // Checking if the current clicked point is the same
-      // Or close to the initial point
       if (
         Math.abs(element.x - points[0].x) < 3 &&
         Math.abs(element.y - points[0].y) < 3
@@ -148,17 +146,13 @@ function handleDrawing(x, y) {
         isDrawing = false;
         enableButton(stopBtn);
         msgEl.innerText = "Shape is closed";
-
-        // ctx.closePath();
-        // ctx.fillStyle = 'red';
-        // ctx.fill();
       }
     }
   });
   ctx.stroke();
 }
 
-function handleSelection(x, y) {
+function handleClickSelection(x, y) {
   const shape = findShapeInShapes(shapes, x, y);
   if (shape) {
     drawShape(ctx, shape);
@@ -169,4 +163,50 @@ function handleSelection(x, y) {
   } else {
     msgEl.innerText = "No shape selected";
   }
+}
+
+function handleClickEditing(x, y) {
+  if (isEditing && selectedShape) {
+    isEditing = false;
+    shapes = shapes.map((shape) => {
+      if (shape.id === selectedShape.id) {
+        return selectedShape;
+      }
+      return shape;
+    });
+    localStorage.setItem("shapes", JSON.stringify(shapes));
+  } else {
+    const matchingPoints = getMatchingPoints(x, y, selectedShape);
+    if (matchingPoints) {
+      selectedPointIndex = matchingPoints.index;
+      isEditing = true;
+    }
+  }
+}
+
+function handleDrawing(x, y) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  renderPreviousShapes(ctx, shapes);
+  ctx.beginPath();
+  points.forEach((element, index) => {
+    if (index === 0) ctx.moveTo(element.x, element.y);
+    else ctx.lineTo(element.x, element.y);
+  });
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(points[points.length - 1].x, points[points.length - 1].y);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+}
+
+function handleEditing(x, y) {
+  selectedShape.points = selectedShape.points.map((point, index) => {
+    if (index == selectedPointIndex) {
+      return { x, y };
+    }
+    return point;
+  });
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  renderPreviousShapes(ctx, shapes);
+  drawDotsAroundShape(ctx, selectedShape);
 }

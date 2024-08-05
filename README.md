@@ -9,7 +9,6 @@ A very minimal drawing application created with HTML, CSS and JavaScript using t
 - [Installation](#installation)
 - [Usage](#usage)
 - [Output](#output)
-- [License](#license)
 
 ## Installation
 
@@ -23,15 +22,6 @@ A very minimal drawing application created with HTML, CSS and JavaScript using t
 Open a browser window and navigate to http://localhost:5173 to access the project locally. Start clicking on the canvas and draw any shapes you want.
 
 ## Output
-Before drawing
-![](public/1_output.png)
+![](public/output.png)
 
-After
-![](public/2_output.png)
-
-## License
-
-The code in this project is licensed under the MIT License.
-
-MIT License
 
